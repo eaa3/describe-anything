@@ -14,18 +14,36 @@ International Conference on Computer Vision (ICCV) 2025
 
 # Running Describe Anything Model
 
+## Quick Start (uv)
+
+Launch the video description demo in one line (requires a CUDA GPU):
+
+```sh
+git clone https://github.com/NVlabs/describe-anything && cd describe-anything
+uv run --extra sam2 demo_video.py
+```
+
+Run the test suite:
+
+```sh
+uv run --extra sam2 --extra test python -m pytest
+```
+
 ## Installation
 
 Install the `dam` package:
 
 ```sh
-# You can install it without cloning the repo
+# Using uv (recommended)
+uv pip install "dam[sam2] @ git+https://github.com/NVlabs/describe-anything"
+
+# Using pip
 pip install git+https://github.com/NVlabs/describe-anything
 
 # You can also clone the repo and install it locally
 git clone https://github.com/NVlabs/describe-anything
 cd describe-anything
-pip install -v .
+uv pip install -e ".[sam2]"   # or: pip install -v .
 ```
 
 We also provide a self-contained script for detailed localized image descriptions without installing additional dependencies. Please refer to the [examples/dam_with_sam_self_contained.py](examples/dam_with_sam_self_contained.py) or [this Colab](https://colab.research.google.com/drive/1bQqAMRH2vdjoWpDpuMSb3SBf_OAntadZ?usp=sharing) for more details.
@@ -96,7 +114,7 @@ python examples/dam_with_sam_self_contained.py --image_path images/1.jpg --point
 ### Detailed Localized Video Descriptions
 * [`examples/dam_video_with_sam2.py`](examples/dam_video_with_sam2.py) - Video processing script using SAM v2.1 that only requires first-frame localization and automatically propagates masks through the video
 
-You will need to [install SAM 2](https://github.com/facebookresearch/sam2/blob/main/INSTALL.md) and download the model weights [sam2.1_hiera_large.pt](https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_large.pt) for SAM 2.1 according to the instructions.
+SAM 2.1 model weights are downloaded automatically from HuggingFace Hub at first run. If you prefer a manual install, see the [SAM 2 installation guide](https://github.com/facebookresearch/sam2/blob/main/INSTALL.md).
 
 <details>
 <summary>Expand to see example commands</summary>

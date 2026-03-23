@@ -353,6 +353,8 @@ class ContextProvider(PreTrainedModel):
         else:
             raise ValueError(f"Unknown context provider type: {context_provider_type}")
 
+        self.post_init()
+
     def forward(self, cimage_full_features=None, cimage_crop_features=None, cimage_concatenated=None, vision_tower=None):
         if self.context_provider_type == "cross_attn_end_to_all":
             assert cimage_full_features.shape[0] == cimage_concatenated.shape[0], f"shape mismatches: {cimage_full_features.shape[0]} != {cimage_concatenated.shape[0]}"

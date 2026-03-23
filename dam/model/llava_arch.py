@@ -42,20 +42,28 @@ from .configuration_llava import LlavaConfig
 
 from transformers.modeling_utils import ContextManagers
 
+from contextlib import contextmanager
+
 try:
-    from transformers.modeling_utils import no_init_weights
+    from transformers.modeling_utils import no_init_weights as _transformers_no_init_weights
 except ImportError:
-    # transformers >= 5.0 removed no_init_weights; provide a compatible shim
-    from contextlib import contextmanager
+    _transformers_no_init_weights = None
 
-    @contextmanager
-    def no_init_weights(_enable=True):
-        import torch.nn as nn
 
-        if not _enable:
+@contextmanager
+def no_init_weights(_enable=True):
+    """Wrapper that accepts the legacy _enable kwarg across all transformers versions."""
+    import torch.nn as nn
+
+    if not _enable:
+        yield
+        return
+
+    if _transformers_no_init_weights is not None:
+        with _transformers_no_init_weights():
             yield
-            return
-
+    else:
+        # transformers >= 5.0 removed no_init_weights; inline the logic
         old_inits = {}
         for name in ["kaiming_uniform_", "uniform_", "normal_", "zeros_", "ones_"]:
             old_inits[name] = getattr(nn.init, name)

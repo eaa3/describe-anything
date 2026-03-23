@@ -40,7 +40,31 @@ from .multimodal_encoder.builder import build_vision_tower, build_context_provid
 from .multimodal_projector.builder import build_mm_projector
 from .configuration_llava import LlavaConfig
 
-from transformers.modeling_utils import ContextManagers, no_init_weights
+from transformers.modeling_utils import ContextManagers
+
+try:
+    from transformers.modeling_utils import no_init_weights
+except ImportError:
+    # transformers >= 5.0 removed no_init_weights; provide a compatible shim
+    from contextlib import contextmanager
+
+    @contextmanager
+    def no_init_weights(_enable=True):
+        import torch.nn as nn
+
+        if not _enable:
+            yield
+            return
+
+        old_inits = {}
+        for name in ["kaiming_uniform_", "uniform_", "normal_", "zeros_", "ones_"]:
+            old_inits[name] = getattr(nn.init, name)
+            setattr(nn.init, name, lambda *args, **kwargs: None)
+        try:
+            yield
+        finally:
+            for name, fn in old_inits.items():
+                setattr(nn.init, name, fn)
 
 ## TODO decide whether should we use metaclass
 class LlavaMetaModel(ABC):

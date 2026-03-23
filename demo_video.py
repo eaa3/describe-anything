@@ -26,8 +26,8 @@ import tempfile
 
 # Import DAM and disable torch init to speed up model loading (no effect on results)
 from dam import DescribeAnythingModel, disable_torch_init
-# Import SAM2 video predictor builder (make sure your PYTHONPATH is set correctly)
-from sam2.build_sam import build_sam2_video_predictor
+# Import SAM2 video predictor (auto-downloads from HuggingFace Hub)
+from sam2.sam2_video_predictor import SAM2VideoPredictor
 
 query = 'Video: <image><image><image><image><image><image><image><image>\nGiven the video in the form of a sequence of frames above, describe the object in the masked region in the video in detail.'
 
@@ -223,7 +223,9 @@ def describe_video(video_path, annotated_frame):
 # Main Gradio demo UI and model initialization
 #############################################
 
-if __name__ == "__main__":
+def main():
+    global predictor, dam, args_cli
+
     parser = argparse.ArgumentParser(description="Describe Anything Video Demo")
     parser.add_argument("--server_addr", "--host", type=str, default="127.0.0.1", help="Server address to listen on.")
     parser.add_argument("--server_port", "--port", type=int, default=7860, help="Port to listen on.")
@@ -236,10 +238,8 @@ if __name__ == "__main__":
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    # Build the SAM2 predictor for video (using SAM2.1 hiera large checkpoint and config)
-    sam2_checkpoint = "checkpoints/sam2.1_hiera_large.pt"
-    model_cfg = "configs/sam2.1/sam2.1_hiera_l.yaml"
-    predictor = build_sam2_video_predictor(model_cfg, sam2_checkpoint, device=device)
+    # Build the SAM2 predictor for video (auto-downloads from HuggingFace Hub)
+    predictor = SAM2VideoPredictor.from_pretrained("facebook/sam2.1-hiera-large", device=device)
 
     # Disable model weight initialization (for faster model loading)
     disable_torch_init()
@@ -257,7 +257,7 @@ if __name__ == "__main__":
         gr.Markdown(
         f"""
         # 🎥 Describe Anything Video Demo
-        
+
         ## 🚀 Overview
         This demo allows you to upload a video and get detailed descriptions of objects within it. The system uses advanced AI models to track and describe objects across video frames.
 
@@ -270,7 +270,7 @@ if __name__ == "__main__":
         4. Click **"Describe"** to generate the description
 
         ⚠️ **Note:** This demo only supports annotation on the first frame. For more advanced features like annotation on any frame, please use `examples/dam_video_with_sam2.py`.
-        
+
         ⚠️ **Note:** Do not upload videos that are too long. Otherwise SAM2 will be very slow.
         """)
         with gr.Row():
@@ -318,3 +318,7 @@ if __name__ == "__main__":
         server_name=args_cli.server_addr,
         server_port=args_cli.server_port,
     )
+
+
+if __name__ == "__main__":
+    main()

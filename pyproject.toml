@@ -1,40 +1,52 @@
 [build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [project]
 name = "dam"
 version = "1.0.0"
 description = "Describe Anything Model (DAM)"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",
 ]
 
-# Depending your use cases, the version requirements can be relaxed.
 dependencies = [
-    "torch>=2.0.0", "torchvision",
-    "transformers>=4.41.2", "tokenizers>=0.19.1", "sentencepiece",
-    "accelerate>=0.28.0", 
-    "pydantic>=2.10.1,<=2.10.6", 
-    "numpy>=1.23.5,<2.0.0", 
-    "pillow>=9.4.0",
-    "gradio>=5.5.0", 
-    "requests", "httpx", "uvicorn", "fastapi", "protobuf",
+    "torch>=2.1.0",
+    "torchvision",
+    "transformers>=4.45.0",
+    "tokenizers>=0.20.0",
+    "sentencepiece",
+    "accelerate>=0.34.0",
+    "pydantic>=2.10.1",
+    "numpy>=1.26.0",
+    "pillow>=10.0.0",
+    "gradio>=5.5.0",
+    "requests",
+    "httpx",
+    "uvicorn",
+    "fastapi",
+    "protobuf",
     "opencv-python",
-    "openai>=1.55.0"
+    "openai>=1.55.0",
 ]
 
 [project.optional-dependencies]
-train = ["deepspeed==0.9.5", "ninja", "wandb"]
+train = ["deepspeed>=0.14.0", "ninja", "wandb"]
 eval = [
     "pycocotools",
     "matplotlib",
 ]
 sam = ["segment-anything @ git+https://github.com/facebookresearch/segment-anything.git"]
 sam2 = ["sam-2 @ git+https://github.com/facebookresearch/sam2.git"]
+
+[project.scripts]
+dam-video-demo = "demo_video:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["dam"]
 
 [tool.black]
 line-length = 120
@@ -47,9 +59,3 @@ force_grid_wrap = 0
 use_parentheses = true
 ensure_newline_before_comments = true
 line_length = 120
-
-[tool.setuptools.packages.find]
-exclude = ["assets*", "benchmark*", "docs", "dist*", "images*", "videos*", "scripts*", "checkpoints*", "*_ignored*"]
-
-[tool.wheel]
-exclude = ["assets*", "benchmark*", "docs", "dist*", "images*", "videos*", "scripts*", "checkpoints*", "*_ignored*"]
